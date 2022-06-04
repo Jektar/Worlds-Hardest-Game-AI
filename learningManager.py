@@ -97,7 +97,7 @@ def trainModel(generations=1000, nModels=100, survivingPop=0.1, showEvery=20, ma
         scores = sorted(scores, reverse=True)
 
         if i%showEvery == 0:
-            WHG.main(models, message='Generation: '+str(i), visuals=True, firstGreen=True)
+            WHG.main(models, message='Generation: '+str(i), visuals=True, firstGreen=True, file=map)
 
         best = models[:int(survivingPop*nModels)]
 
