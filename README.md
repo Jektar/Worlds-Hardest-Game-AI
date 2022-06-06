@@ -14,4 +14,7 @@ This creates the first point and furhter points in the path are added by subsequ
 You remove a blob using backspace and rotate through blobs using the arrow keys. 
 Blobs not currently selected will only show their starting point, greyed out
 
+To switch to circle mode, press c. These are the blobs that spin sround a point. Here you will first choose where the center of the circle is and then you will click again to determine the radius.
+Exit circle mode with c. Circles created in circle mode are not higlighted.
+
 Checkpoints serve as a guide to AI and it will only be able to learn fairly straight lines between checkpoints
