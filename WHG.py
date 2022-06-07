@@ -12,8 +12,7 @@ pg.display.set_caption('Worlds Hardest Game, played by AI')
 
 clock = pg.time.Clock()
 
-
-def main(ais=None, file='Maps/lvl2.txt', visuals=True, message='WHG', firstGreen=False):
+def main(ais=None, file='Maps/lvl1.txt', visuals=True, message='WHG', firstGreen=False):
 
     pg.display.set_caption(message)
 

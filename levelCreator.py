@@ -4,7 +4,7 @@ from settings import *
 from pygame.locals import *
 import sys, loadWorld
 
-saveTo = 'Maps/lvl2.txt'
+saveTo = 'Maps/lvl1.txt'
 
 def empty(_):
     #This is the definition of useless, but we have to input a function to every button even if it has no direct effect
@@ -80,6 +80,10 @@ if newFile:
 
 def saveMap(_):
     global walls, badBlobs, goal, checkPoints, startPos, saveTo
+    pathBlobs = [blob for blob in badBlobs if type(blob[1]) != int]
+    circleBlobs = [blob for blob in badBlobs if type(blob[1]) == int]
+
+
     with open(saveTo, 'w') as f:
         #Probably definitly have to change this
         #All parameters should be global, not parameters
@@ -88,8 +92,11 @@ def saveMap(_):
         goalX, goalY, goalW, goalH = goal.topleft[0]//tileSize, goal.topleft[1]//tileSize, goal.width//tileSize, goal.height//tileSize
         f.write(str(goalX)+';'+str(goalY)+';'+str(goalW)+';'+str(goalH)+'\n')
 
-        badBlobsString = '|'.join([';'.join([str(pos[0])+','+str(pos[1]) for pos in blob]) for blob in badBlobs])
-        f.write(badBlobsString+'\n')
+        badPathBlobsString = '|'.join([';'.join([str(pos[0])+','+str(pos[1]) for pos in blob]) for blob in pathBlobs])
+        f.write(badPathBlobsString+'\n')
+
+        badCircleBlobsString = '|'.join([str(blob[0][0])+','+str(blob[0][1])+';'+str(blob[1]) for blob in circleBlobs])
+        f.write(badCircleBlobsString+'\n')
 
         checkPointsString = '|'.join([str(pos[0]//tileSize)+';'+str(pos[1]//tileSize) for pos in checkPoints])
         f.write(checkPointsString+'\n')
@@ -153,9 +160,11 @@ interFace.addButton(button)
 
 interFace.setSurface(screen)
 
-##The ability to open a file?
-
 isHolding = False
+
+circleMode = False
+
+directions = [(0, -1), (1, 0), (0, 1), (-1, 0)]
 
 while True:
     for event in pg.event.get():
@@ -192,6 +201,9 @@ while True:
                     badBlobs.append([])
                     currentBlob = len(badBlobs)-1
 
+            elif event.key == K_c:
+                circleMode = not circleMode
+
 
         if event.type == MOUSEBUTTONDOWN:
             pos = pg.mouse.get_pos()
@@ -202,8 +214,22 @@ while True:
 
             if option == 2:
                 if badBlobs != []:
-                    centerPos = (pos[0]//tileSize)*tileSize+tileSize//2, (pos[1]//tileSize)*tileSize+tileSize//2
-                    badBlobs[currentBlob].append(centerPos)
+                    if not circleMode:
+                        centerPos = (pos[0]//tileSize)*tileSize+tileSize//2, (pos[1]//tileSize)*tileSize+tileSize//2
+                        badBlobs[currentBlob].append(centerPos)
+
+                    else:
+                        if badBlobs[currentBlob] == []:
+                            pos = (pos[0]+tileSize//4, pos[1]+tileSize//4)
+                            centerPos = (pos[0]//(tileSize//2))*tileSize//2, (pos[1]//(tileSize//2))*tileSize//2
+                            badBlobs[currentBlob] = [centerPos, 0]
+
+                        elif badBlobs[currentBlob][1] == 0:
+                            #Euclid distance normalised to tileSize
+                            distance = ((pos[0]-badBlobs[currentBlob][0][0])**2+(pos[1]-badBlobs[currentBlob][0][1])**2)**0.5//tileSize
+
+                            badBlobs[currentBlob][1] = int(distance)
+
 
             elif option == 3:
                 if pos[0] < WIDTH and pos[1] < HEIGHT:
@@ -314,12 +340,27 @@ while True:
     if badBlobs != []:
         for i, blob in enumerate(badBlobs):
             if blob != []:
-                if i == currentBlob and option == 2:
+                if type(blob[1]) == int:
+                    #Do stuff
+                    for dir in directions:
+                        for i in range(blob[1]):
+                            pg.draw.circle(screen, (180, 180, 180), (blob[0][0] + dir[0]*(i+1)*tileSize, blob[0][1] + dir[1]*(i+1)*tileSize), 5)
+
+                else:
+                    if i == currentBlob and option == 2:
+                        pg.draw.circle(screen, (0, 0, 255), blob[0], 7)
+                        for blob in blob[1:]:
+                            pg.draw.circle(screen, (0, 0, 255), blob, 5)
+                    else:
+                        pg.draw.circle(screen, (120, 120, 150), blob[0], 5)
+
+        #Redraw the current one, to make sure it's on top
+        for i, blob in enumerate(badBlobs):
+            if blob != []:
+                if i == currentBlob and option == 2 and type(blob[1]) != int:
                     pg.draw.circle(screen, (0, 0, 255), blob[0], 7)
                     for blob in blob[1:]:
                         pg.draw.circle(screen, (0, 0, 255), blob, 5)
-                else:
-                    pg.draw.circle(screen, (120, 120, 150), blob[0], 5)
 
 
     interFace.draw()

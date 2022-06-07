@@ -117,4 +117,4 @@ def trainModel(generations=1000, nModels=100, survivingPop=0.1, showEvery=20, ma
     return models
 
 if __name__ == '__main__':
-    trainModel()
+    trainModel(map='Maps/lvl1.txt')

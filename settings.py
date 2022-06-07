@@ -5,6 +5,9 @@ FPS = 30
 sizeX = 30
 sizeY = 20
 
+import math
+circleBlobSpeed = math.pi/90
+
 WIDTH = tileSize * sizeX # width of the world in tiles
 HEIGHT = tileSize * sizeY # height of the world in tiles
 

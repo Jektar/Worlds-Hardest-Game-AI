@@ -48,14 +48,6 @@ class Player:
                 pass
 
     def checkCollisions(self, walls, enemies, checkPoints):
-        currentGoal = checkPoints[self.accivedCheckPoints+1]
-        if self.rect.colliderect(currentGoal) or (self.ai == None and self.rect.colliderect(checkPoints[-1])):
-            self.accivedCheckPoints += 1
-            if self.accivedCheckPoints == len(checkPoints)-1:
-                self.hasWon = True
-                self.alive = False
-                self.accivedCheckPoints = -1
-
         gridPos = (self.rect.center[0]//tileSize, self.rect.center[1]//tileSize)
 
         relevantWalls = [(gridPos[0] + i, gridPos[1] + j) for i in range(-1, 2) for j in range(-1, 2)]
@@ -78,6 +70,14 @@ class Player:
         for enemy in enemies:
             if enemy.checkCollisions(self):
                 self.alive = False
+
+        currentGoal = checkPoints[self.accivedCheckPoints+1]
+        if self.rect.colliderect(currentGoal) or (self.ai == None and self.rect.colliderect(checkPoints[-1]) and False):
+            self.accivedCheckPoints += 1
+            if self.accivedCheckPoints == len(checkPoints)-1:
+                self.hasWon = True
+                self.alive = False
+                self.accivedCheckPoints = -1
 
 
     def update(self, walls, enemies, goal):

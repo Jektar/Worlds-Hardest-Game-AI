@@ -1,6 +1,14 @@
 from settings import *
 import math, copy
 import pygame as pg
+import numpy as np
+
+directions = [(0, -1), (1, 0), (0, 1), (-1, 0)]
+
+def euclideanDist(p1, p2):
+    x1, y1 = p1
+    x2, y2 = p2
+    return math.sqrt((x1-x2)**2 + (y1-y2)**2)
 
 def getImg(imgName):
     img = pg.image.load('Sprites/'+imgName)
@@ -25,7 +33,8 @@ def getAllPointsInLine(start, end, step=1):
         for x in range(x1, x2, step):
             points.append((x, y1))
     else:
-        print("Error: Points are not on the same line")
+        #print("Error: Points are not on the same line")
+        pass
     return points
 
 def createBlobPath(corners, blobspeed=5):
@@ -43,7 +52,73 @@ def createBlobPath(corners, blobspeed=5):
 
     return path
 
-blob = getImg('blob.png')
+def getAngle(center, point):
+    x, y = point
+    x1, y1 = center
+    return math.atan2(y-y1, x-x1)
+
+def getPosFromAngle(distance, center, angle):
+    x, y = center
+    return (x + distance * math.cos(angle), y + distance * math.sin(angle))
+
+blobImg = getImg('blob.png')
+
+class BadCircleBlobs:
+    def __init__(self, center, nBlobs, radius=tileSize//6):
+        self.center = center
+        self.radius = radius
+        self.blobs = []
+        for dir in directions:
+            for i in range(nBlobs):
+                self.blobs.append([self.center[0] + dir[0] * tileSize * (i+1), self.center[1] + dir[1] * tileSize * (i+1)])
+
+
+    def update(self):
+        for i, blob in enumerate(self.blobs):
+            #Here we need math, and lots of it
+            currentAngle = getAngle(self.center, blob)
+            newAngle = currentAngle + circleBlobSpeed
+            distance = euclideanDist(self.center, blob)
+            newPos = getPosFromAngle(distance, self.center, newAngle)
+            self.blobs[i] = newPos
+
+
+
+    def checkCollisions(self, player):
+        for blob in self.blobs:
+            if self.checkIndividualCollisions(blob, player):
+                return True
+
+        return False
+
+    def checkIndividualCollisions(self, blobCenter, player):
+        rect = player.rect
+        cx, cy = blobCenter[0], blobCenter[1]
+        rx, ry = rect.x, rect.y
+        width, height = rect.width, rect.height
+
+        testX = cx
+        testY = cy
+
+        if (cx < rx):
+            testX = rx  # Left edge
+        elif (cx > rx + width):
+            testX = rx + width  # Right edge
+
+        if (cy < ry):
+            testY = ry  # Top edge
+        elif (cy > ry + height):
+            testY = ry + height  # Bottom edge
+
+        distX = cx - testX
+        distY = cy - testY
+        distance = math.sqrt(distX ** 2 + distY ** 2)
+
+        return distance <= self.radius
+
+    def draw(self, screen):
+        for blob in self.blobs:
+            screen.blit(blobImg, (blob[0], blob[1]))
 
 class BadBlobs:
     def __init__(self, travelPath, radius=tileSize//6):
@@ -84,5 +159,5 @@ class BadBlobs:
         return distance <= self.radius
 
     def draw(self, screen):
-        screen.blit(blob, (self.x-5, self.y-5))
+        screen.blit(blobImg, (self.x-5, self.y-5))
 
