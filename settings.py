@@ -2,6 +2,7 @@ tileSize = 32
 blobSpeed = 1
 FPS = 30
 
+#Number of tiles on the screen
 sizeX = 30
 sizeY = 20
 
